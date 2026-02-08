@@ -1,7 +1,8 @@
 import { Page, Locator } from '@playwright/test';
 import { PageObject } from '../PageObject';
 import { TestStep } from '../utils/test-step';
-import { selectors } from '../selectors';
+
+const codeInput = '[data-test="single-input"], .code-input';
 
 export class VerificationPage extends PageObject {
   constructor(page: Page) {
@@ -15,7 +16,7 @@ export class VerificationPage extends PageObject {
   }
 
   get codeInputs(): Locator {
-    return this.page.locator(selectors.codeInput);
+    return this.page.locator(codeInput);
   }
 
   get verifyButton(): Locator {

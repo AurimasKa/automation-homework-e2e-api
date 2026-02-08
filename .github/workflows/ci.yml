@@ -66,6 +66,10 @@ jobs:
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'pull_request'
     needs: [test]
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     steps:
       - name: Create or update PR comment
         uses: peter-evans/create-or-update-comment@v4
@@ -77,5 +81,4 @@ jobs:
             ${{ needs.test.result == 'success' && '✅ **All tests passed**' || '❌ **Tests failed**' }}
 
             **[Open workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})** → download **playwright-html-report** at the bottom → unzip → open `index.html` in a browser to view the full report.
-          comment-tag: playwright-ci
           edit-mode: replace
