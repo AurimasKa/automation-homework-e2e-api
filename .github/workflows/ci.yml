@@ -1,6 +1,7 @@
 name: CI
 
 # Tests run on every push to main/master and on every PR (opened, updated, reopened).
+# Trigger: push or open/update PR.
 # No branch filter on pull_request = runs for all PRs regardless of base or head branch.
 on:
   push:
