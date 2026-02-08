@@ -19,7 +19,7 @@ export default defineConfig({
         ['line']
       ]
     : [
-        ['html', { outputFolder: 'playwright-report', open: 'on-failure' }],
+        ['html', { outputFolder: 'playwright-report', open: 'always' }],
         ['list']
       ],
   use: {

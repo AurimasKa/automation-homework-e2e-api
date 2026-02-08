@@ -80,6 +80,14 @@ API tests use **Playwright Test** with **Axios** and **Zod** (no browser).
 
 ## View report
 
+Run tests and open the **rich HTML report** in your browser:
+
+```bash
+npm run test:open-report
+```
+
+Or open the last generated report (after running `npm test`):
+
 ```bash
 npm run report
 ```
