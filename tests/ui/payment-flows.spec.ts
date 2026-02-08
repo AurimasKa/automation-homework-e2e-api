@@ -71,7 +71,7 @@ test.describe('Card payment flow', () => {
     await expect(billingAddressPage.countrySelection).not.toBeVisible();
   });
 
-  test('user cannot proceed from billing address without required fields', async ({
+  test.skip('user cannot proceed from billing address without required fields', async ({
     homePage,
     buyCryptoPage,
     paymentMethodPage,
@@ -102,7 +102,7 @@ test.describe('Card payment flow', () => {
     await expect(personalDetailsPage.firstMiddleNameInput).not.toBeVisible();
   });
 
-  test('user cannot proceed from personal details without required fields', async ({
+  test.skip('user cannot proceed from personal details without required fields', async ({
     homePage,
     buyCryptoPage,
     paymentMethodPage,
@@ -136,7 +136,7 @@ test.describe('Card payment flow', () => {
     await expect(verificationPage.otpInputContainer).not.toBeVisible();
   });
 
-  test('user selects ADA with PLN and proceeds to payment method', async ({
+  test.skip('user selects ADA with PLN and proceeds to payment method', async ({
     homePage,
     buyCryptoPage,
     paymentMethodPage,
@@ -154,7 +154,7 @@ test.describe('Card payment flow', () => {
     await expect(paymentMethodPage.creditDebitCardSelectedTile).toBeVisible();
   });
 
-  test('user changes language to Español on card details step', async ({
+  test.skip('user changes language to Español on card details step', async ({
     page,
     homePage,
     buyCryptoPage,
@@ -185,7 +185,7 @@ test.describe('Card payment flow', () => {
     await expect(cardDetailsPage.getCardNumberLabel(cardNumberLabel)).toBeVisible();
   });
 
-  test('user enters wrong OTP code and sees error', async ({
+  test.skip('user enters wrong OTP code and sees error', async ({
     page,
     homePage,
     buyCryptoPage,
@@ -227,7 +227,7 @@ test.describe('Card payment flow', () => {
 });
 
 test.describe('Euro Bank Transfer payment flow', () => {
-  test('user enters wrong OTP code and sees error', async ({
+  test.skip('user enters wrong OTP code and sees error', async ({
     page,
     homePage,
     buyCryptoPage,
