@@ -1,8 +1,8 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
 
-export class SimplexPaymentMethodPage extends PageObject {
+export class PaymentMethodPage extends PageObject {
   constructor(page: Page) {
     super(page);
   }
