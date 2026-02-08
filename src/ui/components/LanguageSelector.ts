@@ -1,5 +1,5 @@
 import { Page, Locator } from '@playwright/test';
-import { TestStep } from '../../../utils/test-step';
+import { TestStep } from '../utils/test-step';
 
 export const LANGUAGES = {
   ESPANOL: 'Español',

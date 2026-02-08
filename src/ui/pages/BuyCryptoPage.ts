@@ -1,16 +1,15 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
+import { selectors } from '../selectors';
 
-const FORM_IFRAME_SELECTOR = 'iframe[src*="simplex-affiliates.com/form"]';
-
-export class SimplexBuyCryptoPage extends PageObject {
+export class BuyCryptoPage extends PageObject {
   constructor(page: Page) {
     super(page);
   }
 
   private get formFrame() {
-    return this.page.frameLocator(FORM_IFRAME_SELECTOR);
+    return this.page.frameLocator(selectors.formIframe);
   }
 
   get fiatAmountInput(): Locator {

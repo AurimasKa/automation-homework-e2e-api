@@ -1,8 +1,9 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
+import { selectors } from '../selectors';
 
-export class SimplexVerificationPage extends PageObject {
+export class VerificationPage extends PageObject {
   constructor(page: Page) {
     super(page);
   }
@@ -14,7 +15,7 @@ export class SimplexVerificationPage extends PageObject {
   }
 
   get codeInputs(): Locator {
-    return this.page.locator('[data-test="single-input"], .code-input');
+    return this.page.locator(selectors.codeInput);
   }
 
   get verifyButton(): Locator {

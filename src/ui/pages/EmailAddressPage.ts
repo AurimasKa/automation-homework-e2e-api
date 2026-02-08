@@ -1,14 +1,15 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
+import { testIds } from '../utils/testIds';
 
-export class SimplexEmailAddressPage extends PageObject {
+export class EmailAddressPage extends PageObject {
   constructor(page: Page) {
     super(page);
   }
 
   get emailInput(): Locator {
-    return this.page.locator('#email-collection-input, [data-testid="email-collection-input"]').first();
+    return this.page.locator(`#email-collection-input, [data-testid="${testIds.emailCollectionInput}"]`).first();
   }
 
   get termsAndConditionsCheckbox(): Locator {

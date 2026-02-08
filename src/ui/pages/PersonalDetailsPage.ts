@@ -1,9 +1,10 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
-import { BirthdayPicker } from '../../components/checkout/birthday-picker';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
+import { BirthdayPicker } from '../components/BirthdayPicker';
+import { testIds } from '../utils/testIds';
 
-export class SimplexPersonalDetailsPage extends PageObject {
+export class PersonalDetailsPage extends PageObject {
   private _birthdayPicker: BirthdayPicker | undefined;
 
   constructor(page: Page) {
@@ -16,15 +17,15 @@ export class SimplexPersonalDetailsPage extends PageObject {
   }
 
   get firstMiddleNameInput(): Locator {
-    return this.page.locator('#firstMiddleName, [data-testid="firstMiddleName"], input[name="firstMiddleName"]').first();
+    return this.page.locator(`#firstMiddleName, [data-testid="${testIds.firstMiddleName}"], input[name="firstMiddleName"]`).first();
   }
 
   get lastNameInput(): Locator {
-    return this.page.locator('#lastName, [data-testid="lastName"], input[name="lastName"]').first();
+    return this.page.locator(`#lastName, [data-testid="${testIds.lastName}"], input[name="lastName"]`).first();
   }
 
   get phoneNumberInput(): Locator {
-    return this.page.locator('#phoneNumber, [data-testid="phoneNumber"], input[name="phoneNumberModel"]').first();
+    return this.page.locator(`#phoneNumber, [data-testid="${testIds.phoneNumber}"], input[name="phoneNumberModel"]`).first();
   }
 
   get countryPrefixSelector(): Locator {
@@ -36,7 +37,7 @@ export class SimplexPersonalDetailsPage extends PageObject {
   }
 
   get emailInput(): Locator {
-    return this.page.locator('#email-collection-input, [data-testid="email-collection-input"], input[name="email"]').first();
+    return this.page.locator(`#email-collection-input, [data-testid="${testIds.emailCollectionInput}"], input[name="email"]`).first();
   }
 
   get payNowButton(): Locator {

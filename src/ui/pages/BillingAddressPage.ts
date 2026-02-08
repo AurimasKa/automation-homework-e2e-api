@@ -1,8 +1,9 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
+import { testIds } from '../utils/testIds';
 
-export class SimplexBillingAddressPage extends PageObject {
+export class BillingAddressPage extends PageObject {
   constructor(page: Page) {
     super(page);
   }
@@ -14,15 +15,15 @@ export class SimplexBillingAddressPage extends PageObject {
   }
 
   get cityInput(): Locator {
-    return this.page.locator('#city, [data-testid="city"], [name="city"]').first();
+    return this.page.locator(`#city, [data-testid="${testIds.city}"], [name="city"]`).first();
   }
 
   get streetInput(): Locator {
-    return this.page.locator('#street, [data-testid="street"], [name="street"]').first();
+    return this.page.locator(`#street, [data-testid="${testIds.street}"], [name="street"]`).first();
   }
 
   get zipCodeInput(): Locator {
-    return this.page.locator('#zipCode, [data-testid="zipCode"], [name="zipCode"]').first();
+    return this.page.locator(`#zipCode, [data-testid="${testIds.zipCode}"], [name="zipCode"]`).first();
   }
 
   get nextButton(): Locator {

@@ -1,9 +1,10 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
-import { ExpirationDatePicker } from '../../components/checkout/expiration-date-picker';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
+import { ExpirationDatePicker } from '../components/ExpirationDatePicker';
+import { testIds } from '../utils/testIds';
 
-export class SimplexCardDetailsPage extends PageObject {
+export class CardDetailsPage extends PageObject {
   private _expirationDatePicker: ExpirationDatePicker | undefined;
 
   constructor(page: Page) {
@@ -16,16 +17,16 @@ export class SimplexCardDetailsPage extends PageObject {
   }
 
   get cardNumberInput(): Locator {
-    return this.page.locator('#cardNumber, [data-testid="cardNumber"], [name="cardNumber"]').first();
+    return this.page.locator(`#cardNumber, [data-testid="${testIds.cardNumber}"], [name="cardNumber"]`).first();
   }
 
   get cvvInput(): Locator {
-    return this.page.locator('#cvv, [data-testid="cvv"], [name="cvv"]').first();
+    return this.page.locator(`#cvv, [data-testid="${testIds.cvv}"], [name="cvv"]`).first();
   }
 
   get nameOnCardInput(): Locator {
     return this.page
-      .locator('#nameOnCard, [data-testid="nameOnCard"], [name="nameOnCard"]')
+      .locator(`#nameOnCard, [data-testid="${testIds.nameOnCard}"], [name="nameOnCard"]`)
       .first();
   }
 

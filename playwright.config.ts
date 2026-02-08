@@ -1,4 +1,6 @@
+/// <reference types="node" />
 import { defineConfig, devices } from '@playwright/test';
+import { env, defaultBaseUrl } from './env';
 
 export default defineConfig({
   testDir: './tests',
@@ -29,10 +31,16 @@ export default defineConfig({
 
   projects: [
     {
+      name: 'api',
+      testMatch: /tests\/api\/.*\.spec\.ts/,
+      use: {},
+    },
+    {
       name: 'chromium',
+      testMatch: /tests\/ui\/.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: process.env.BASE_URL ?? 'https://simplex.com',
+        baseURL: env.BASE_URL ?? defaultBaseUrl,
       },
     },
   ],

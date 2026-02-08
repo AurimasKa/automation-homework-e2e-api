@@ -26,4 +26,3 @@ export function TestStep<T extends (...args: any[]) => any>(
     }) as ReturnType<T> extends Promise<infer U> ? Promise<U> : Promise<ReturnType<T>>;
   } as T;
 }
-

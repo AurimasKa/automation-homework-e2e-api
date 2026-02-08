@@ -62,3 +62,22 @@ jobs:
           name: playwright-test-results
           path: test-results/
           retention-days: 14
+
+  pr-comment:
+    name: Comment test result on PR
+    runs-on: ubuntu-latest
+    if: always() && github.event_name == 'pull_request'
+    needs: [test]
+    steps:
+      - name: Create or update PR comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## Playwright test results
+            ${{ needs.test.result == 'success' && '✅ **All tests passed**' || '❌ **Tests failed**' }}
+
+            **[Open workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})** → download **playwright-html-report** at the bottom → unzip → open `index.html` in a browser to view the full report.
+          comment-tag: playwright-ci
+          edit-mode: replace

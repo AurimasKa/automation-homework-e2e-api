@@ -1,9 +1,9 @@
 import { Page, Locator } from '@playwright/test';
-import { PageObject } from '../../page-object';
-import { TestStep } from '../../../utils/test-step';
-import { CookieConsentBanner } from '../../components/home-page/cookie-consent-banner';
+import { PageObject } from '../PageObject';
+import { TestStep } from '../utils/test-step';
+import { CookieConsentBanner } from '../components/CookieConsentBanner';
 
-export class SimplexHomePage extends PageObject {
+export class HomePage extends PageObject {
   private _cookieBanner: CookieConsentBanner | undefined;
 
   constructor(page: Page) {

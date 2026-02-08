@@ -1,14 +1,14 @@
 import { test as base } from '@playwright/test';
-import { HomePage } from '../src/ui/pages/HomePage';
-import { BuyCryptoPage } from '../src/ui/pages/BuyCryptoPage';
-import { PaymentMethodPage } from '../src/ui/pages/PaymentMethodPage';
-import { CardDetailsPage } from '../src/ui/pages/CardDetailsPage';
-import { BillingAddressPage } from '../src/ui/pages/BillingAddressPage';
-import { PersonalDetailsPage } from '../src/ui/pages/PersonalDetailsPage';
-import { EmailAddressPage } from '../src/ui/pages/EmailAddressPage';
-import { VerificationPage } from '../src/ui/pages/VerificationPage';
-import { CookieConsentBanner } from '../src/ui/components/CookieConsentBanner';
-import { LanguageSelector } from '../src/ui/components/LanguageSelector';
+import { HomePage } from '../../../src/ui/pages/HomePage';
+import { BuyCryptoPage } from '../../../src/ui/pages/BuyCryptoPage';
+import { PaymentMethodPage } from '../../../src/ui/pages/PaymentMethodPage';
+import { CardDetailsPage } from '../../../src/ui/pages/CardDetailsPage';
+import { BillingAddressPage } from '../../../src/ui/pages/BillingAddressPage';
+import { PersonalDetailsPage } from '../../../src/ui/pages/PersonalDetailsPage';
+import { EmailAddressPage } from '../../../src/ui/pages/EmailAddressPage';
+import { VerificationPage } from '../../../src/ui/pages/VerificationPage';
+import { CookieConsentBanner } from '../../../src/ui/components/CookieConsentBanner';
+import { LanguageSelector } from '../../../src/ui/components/LanguageSelector';
 
 export const test = base.extend<{
   homePage: HomePage;
