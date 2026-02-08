@@ -69,58 +69,11 @@ jobs:
           path: report-bundle/
           retention-days: 30
 
-  deploy-report:
-    name: Publish report to GitHub Pages
-    runs-on: ubuntu-latest
-    if: always() && !cancelled()
-    needs: [test]
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Create or update gh-pages
-        run: |
-          git fetch origin gh-pages 2>/dev/null || true
-          if git show-ref --verify refs/remotes/origin/gh-pages 2>/dev/null; then
-            git checkout gh-pages
-          else
-            git checkout --orphan gh-pages
-            git rm -rf . 2>/dev/null || true
-            echo "# Reports" > README.md
-            git add README.md
-            git commit -m "Init gh-pages"
-            git push -u origin gh-pages
-          fi
-
-      - name: Download report artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-report
-
-      - name: Publish report for this run
-        run: |
-          RUN_DIR="report/run-${{ github.run_id }}"
-          mkdir -p "$RUN_DIR"
-          cp -r test-reports "$RUN_DIR/" 2>/dev/null || true
-          cp -r test-results "$RUN_DIR/" 2>/dev/null || true
-
-      - name: Commit and push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add report/
-          git diff --staged --quiet || git commit -m "Report: run ${{ github.run_id }}"
-          git push
-
   pr-comment:
     name: Comment on PR
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'pull_request'
-    needs: [test, deploy-report]
+    needs: [test]
     permissions:
       contents: read
       pull-requests: write

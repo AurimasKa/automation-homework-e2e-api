@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Reads Playwright test-reports/results.json and writes a PR comment body to pr-comment-body.md.
- * Expects env: RESULTS_JSON_PATH, TEST_RESULT, REPO, RUN_ID, REPO_OWNER, REPO_NAME (or derives from REPO).
+ * Expects env: RESULTS_JSON_PATH, TEST_RESULT, REPO, RUN_ID.
  */
 import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -14,8 +14,6 @@ const resultsPath = process.env.RESULTS_JSON_PATH || join(root, 'test-reports', 
 const testResult = process.env.TEST_RESULT || 'success';
 const repo = process.env.REPO || '';
 const runId = process.env.RUN_ID || '';
-const repoOwner = process.env.REPO_OWNER || repo.split('/')[0] || '';
-const repoName = process.env.REPO_NAME || repo.split('/')[1] || repo;
 
 function collectFailedTests(suites) {
   const failed = [];
@@ -39,8 +37,6 @@ function collectFailedTests(suites) {
 }
 
 const workflowUrl = 'https://github.com/' + repo + '/actions/runs/' + runId;
-const htmlReportUrl = 'https://' + repoOwner + '.github.io/' + repoName + '/report/run-' + runId + '/test-reports/index.html';
-const showReportCmd = 'npx playwright show-report test-reports';
 
 let body;
 try {
@@ -73,8 +69,6 @@ try {
     lines.push('');
   }
   lines.push('**Summary:** See the **Playwright Tests** check above or the [workflow run](' + workflowUrl + ') for details.');
-  lines.push('');
-  lines.push('**Full report (traces, screenshots, videos):** [Open HTML report →](' + htmlReportUrl + ') · or download the **playwright-report** artifact and run `' + showReportCmd + '` locally.');
   body = lines.join('\n');
 } catch (_err) {
   const status = testResult === 'success' ? '✅ **All tests passed**' : '❌ **Tests failed**';
@@ -84,8 +78,6 @@ try {
     status,
     '',
     '**Summary:** See the [workflow run](' + workflowUrl + ') for details.',
-    '',
-    '**Full report:** Download the **playwright-report** artifact and run `' + showReportCmd + '` locally.',
   ].join('\n');
 }
 
