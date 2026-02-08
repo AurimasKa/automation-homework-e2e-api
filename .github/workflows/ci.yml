@@ -1,5 +1,6 @@
 name: CI
 
+# Run on any PR (no branch filter) so tests run when default branch isn't main/master
 on:
   push:
     branches: [main, master]
