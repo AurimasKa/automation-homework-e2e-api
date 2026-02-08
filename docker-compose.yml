@@ -1,0 +1,11 @@
+# Optional: run Playwright tests in Docker with recommended flags.
+# Usage: docker compose run --rm playwright
+services:
+  playwright:
+    build: .
+    image: automation-homework-playwright:latest
+    # Recommended for Chromium in Docker: avoid zombies and memory issues
+    init: true
+    ipc: host
+    # Run tests (override with: docker compose run --rm playwright npm run test:debug)
+    command: npm test
