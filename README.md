@@ -61,11 +61,11 @@ Optional: set env vars for overrides (see [Run tests](#run-tests)).
 
 Env (optional):
 
-| Variable | Default | Use |
-|----------|---------|-----|
-| `BASE_URL` | `https://simplex.com` | UI E2E base URL |
-| `QUOTE_API_BASE_URL` | `https://iframe.simplex-affiliates.com` | Quote API base |
-| `API_BASE_URL` | `https://api.simplexcc.com/v2` | Generic API client base |
+| Variable             | Default                                 | Use                     |
+| -------------------- | --------------------------------------- | ----------------------- |
+| `BASE_URL`           | `https://simplex.com`                   | UI E2E base URL         |
+| `QUOTE_API_BASE_URL` | `https://iframe.simplex-affiliates.com` | Quote API base          |
+| `API_BASE_URL`       | `https://api.simplexcc.com/v2`          | Generic API client base |
 
 ```bash
 BASE_URL=https://simplex.com npm test

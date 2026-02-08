@@ -70,6 +70,8 @@ jobs:
           path: report-bundle/
           retention-days: 30
 
+  # Project site: publishes at https://<owner>.github.io/<repo>/ (not root).
+  # Pages needs index.html at the published root; we copy the report so index.html is at report-root/.
   deploy-report:
     name: Deploy report to GitHub Pages
     runs-on: ubuntu-latest
@@ -99,9 +101,17 @@ jobs:
           elif [ -f playwright-report/test-reports/index.html ]; then
             cp -r playwright-report/test-reports/. report-root/
           else
+            echo "index.html not found. Search:"
             find . -name index.html
             exit 1
           fi
+          if [ ! -f report-root/index.html ]; then
+            echo "report-root must contain index.html at root for Pages. Contents:"
+            ls -la report-root
+            exit 1
+          fi
+          echo "report-root ready (index.html at root):"
+          ls report-root
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
