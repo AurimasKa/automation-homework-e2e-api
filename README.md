@@ -54,4 +54,4 @@ npm run report
 
 ## CI
 
-Tests run on GitHub Actions on push and pull requests to `main` or `master` (see [.github/workflows/ci.yml](.github/workflows/ci.yml)).
+Tests run on GitHub Actions on push and pull requests to `main` or `master` (see [.github/workflows/ci.yml](.github/workflows/ci.yml)). Open a PR targeting `main`/`master` to trigger a run.
