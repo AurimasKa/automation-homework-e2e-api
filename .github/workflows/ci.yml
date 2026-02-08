@@ -6,6 +6,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   test:
     name: Playwright Tests
@@ -34,14 +39,19 @@ jobs:
         env:
           CI: true
 
-      - name: Test result summary
-        if: always()
-        run: |
-          echo "## ${{ steps.tests.outcome == 'success' && '✅ All tests passed' || '❌ Tests failed' }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.tests.outcome }}" != "success" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Download the **playwright-report** artifact below, then view the report with traces and screenshots." >> $GITHUB_STEP_SUMMARY
-          fi
+      - name: Publish test report
+        if: always() && !cancelled()
+        uses: dorny/test-reporter@v2
+        with:
+          name: Playwright Tests
+          path: test-reports/junit.xml
+          reporter: java-junit
+          list-suites: all
+          list-tests: failed
+          fail-on-error: false
+          fail-on-empty: false
+          report-title: Playwright test results
+          use-actions-summary: true
 
       - name: Prepare report bundle (HTML report + traces, screenshots, videos)
         if: always()
@@ -123,10 +133,7 @@ jobs:
             ## Playwright test results
             ${{ needs.test.result == 'success' && '✅ **All tests passed**' || '❌ **Tests failed**' }}
 
-            **View full report (summary, traces, screenshots, videos):**
-            [Open report →](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/report/run-${{ github.run_id }}/test-reports/index.html)
+            **Summary:** See the **Playwright Tests** check above (or the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id })) for the test result table and failed-test details.
 
-            *(Same view as in the screenshot: test list, View Trace for failures, etc. Enable [GitHub Pages](https://github.com/${{ github.repository }}/settings/pages) from branch `gh-pages` if the link doesn’t work yet.)*
-
-            Or download the **playwright-report** artifact from the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) and run `npx playwright show-report test-reports` locally.
+            **Full report (traces, screenshots, videos):** [Open HTML report →](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/report/run-${{ github.run_id }}/test-reports/index.html) · or download the **playwright-report** artifact and run `npx playwright show-report test-reports` locally.
           edit-mode: replace
