@@ -6,30 +6,23 @@ Playwright-based E2E tests and API tests. Target: [simplex.com](https://simplex.
 
 ```
 automation-homework-e2e-api/
-├── env.ts                           # BASE_URL, QUOTE_API_BASE_URL, API_BASE_URL
+├── env.ts
 ├── src/
 │   ├── api/
-│   │   ├── client/
-│   │   │   ├── http.ts
-│   │   │   └── simplex.client.ts
-│   │   ├── schemas/
-│   │   │   └── quote.schema.ts
-│   │   └── test-data/
-│   │       └── payloads.ts
+│   │   ├── client/          # http.ts, simplex.client.ts
+│   │   ├── schemas/         # quote.schema.ts
+│   │   └── test-data/       # payloads.ts
 │   └── ui/
 │       ├── PageObject.ts
-│       ├── pages/                   # HomePage, BuyCryptoPage, PaymentMethodPage, etc.
-│       ├── components/              # CookieConsentBanner, LanguageSelector, etc.
-│       ├── selectors/
-│       ├── test-data/
-│       └── utils/
+│       ├── pages/           # HomePage, BuyCryptoPage, CardDetailsPage, etc.
+│       ├── components/      # CookieConsentBanner, LanguageSelector, BirthdayPicker, etc.
+│       ├── test-data/       # test-data.ts, card-details-localized.ts
+│       └── utils/           # test-step.ts, testIds.ts
 ├── tests/
 │   ├── api/
 │   │   └── quote.post.spec.ts
 │   └── ui/
-│       ├── fixtures/
-│       │   └── basic.fixture.ts
-│       └── *.spec.ts
+│       └── payment-flows.spec.ts
 ├── fixtures/
 │   └── basic.fixture.ts
 ├── playwright.config.ts
@@ -94,4 +87,4 @@ npm run report
 
 ## CI
 
-Tests run on GitHub Actions on push and pull requests (see [.github/workflows/ci.yml](.github/workflows/ci.yml)). The pipeline runs API and E2E projects and uploads the HTML report and test results as artifacts.
+Tests run on GitHub Actions on push to `main`/`master` and on pull requests ([.github/workflows/ci.yml](.github/workflows/ci.yml)). The workflow runs API and E2E projects, uploads the **playwright-report** artifact (HTML report, traces, screenshots, videos), and posts a summary on PRs with a **Download report (zip)** link to the run. Download the artifact, extract it, then run `npx playwright show-report test-reports` to view the full report locally.
