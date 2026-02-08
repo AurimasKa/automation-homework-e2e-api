@@ -71,53 +71,11 @@ jobs:
           path: report-bundle/
           retention-days: 30
 
-  # Deploy report to Netlify so "View report" in the PR comment opens in the browser.
-  # Add repo secrets: NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID (create a site at netlify.com first).
-  deploy-report:
-    name: Deploy report to Netlify
-    runs-on: ubuntu-latest
-    if: always() && !cancelled() && needs.test.result != 'cancelled' && (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'pull_request')
-    needs: [test]
-    permissions:
-      contents: read
-    outputs:
-      report_url: ${{ steps.deploy.outputs.NETLIFY_LIVE_URL }}
-    steps:
-      - name: Download playwright-report
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-report
-
-      - name: Prepare report for deploy
-        run: |
-          mkdir -p report-root
-          if [ -f test-reports/index.html ]; then
-            cp -r test-reports/. report-root/
-          elif [ -f playwright-report/test-reports/index.html ]; then
-            cp -r playwright-report/test-reports/. report-root/
-          else
-            find . -name index.html
-            exit 1
-          fi
-          test -f report-root/index.html || (ls -la report-root && exit 1)
-
-      - name: Deploy to Netlify
-        id: deploy
-        uses: jsmrcaga/action-netlify-deploy@v2.0.0
-        with:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_DEPLOY_TO_PROD: true
-          build_directory: report-root
-          install_command: "echo Skipping install"
-          build_command: "echo Skipping build"
-    continue-on-error: true
-
   pr-comment:
     name: Comment on PR
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'pull_request' && !cancelled()
-    needs: [test, deploy-report]
+    needs: [test]
     permissions:
       contents: read
       pull-requests: write
@@ -134,14 +92,12 @@ jobs:
         id: screenshots
         if: always()
         env:
-          REPORT_URL: ${{ needs.deploy-report.outputs.report_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           echo "screenshots_md<<EOF" >> $GITHUB_OUTPUT
-          if [ -n "$REPORT_URL" ]; then
-            echo "### View report" >> $GITHUB_OUTPUT
-            echo "[**Open Playwright report**]($REPORT_URL) (HTML report in browser)" >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
-          fi
+          echo "### Download report" >> $GITHUB_OUTPUT
+          echo "[**Download playwright-report (zip)**]($RUN_URL) from this run, then extract and run \`npx playwright show-report test-reports\` to view the full report." >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
           count=0
           for f in $(find test-results -type f -name "*.png" 2>/dev/null | head -10); do
             name=$(basename "$f" .png)
@@ -153,8 +109,6 @@ jobs:
               count=$((count + 1))
             fi
           done
-          echo "" >> $GITHUB_OUTPUT
-          echo "**Videos & full report:** Download the **playwright-report** artifact, extract it, then run \`npx playwright show-report test-reports\` to view videos and the full report." >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Playwright report comment
@@ -164,5 +118,4 @@ jobs:
           report-file: test-reports/results.json
           test-command: "npm test --"
           job-summary: true
-          report-url: ${{ needs.deploy-report.outputs.report_url }}
           footer: ${{ steps.screenshots.outputs.screenshots_md }}
