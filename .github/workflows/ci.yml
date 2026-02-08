@@ -70,55 +70,6 @@ jobs:
           path: report-bundle/
           retention-days: 30
 
-  # Deploys the Playwright HTML report so the PR comment link opens in the browser.
-  # Only deploys from default branch (environment protection rules block PR branches).
-  # Enable in repo: Settings → Pages → Source: GitHub Actions.
-  deploy-report:
-    name: Deploy report to GitHub Pages
-    runs-on: ubuntu-latest
-    if: always() && !cancelled() && needs.test.result != 'cancelled' && github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    needs: [test]
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Download playwright-report
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-report
-
-      # Artifact may extract as workspace root (test-reports/) or under artifact name (playwright-report/test-reports/).
-      # Ensure index.html is at the root of the Pages site.
-      - name: Prepare report for Pages
-        run: |
-          mkdir -p report-root
-          if [ -f test-reports/index.html ]; then
-            cp -r test-reports/. report-root/
-          elif [ -f playwright-report/test-reports/index.html ]; then
-            cp -r playwright-report/test-reports/. report-root/
-          else
-            echo "index.html not found. Contents:"
-            find . -name index.html
-            exit 1
-          fi
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: report-root
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-    continue-on-error: true
-
   pr-comment:
     name: Comment on PR
     runs-on: ubuntu-latest
@@ -136,20 +87,10 @@ jobs:
         with:
           name: playwright-report
 
-      - name: Generate PR comment body
-        run: node .github/scripts/generate-pr-comment.mjs
-        env:
-          RESULTS_JSON_PATH: ${{ github.workspace }}/test-reports/results.json
-          TEST_RESULT: ${{ needs.test.result }}
-          REPO: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
-          REPO_OWNER: ${{ github.repository_owner }}
-          REPO_NAME: ${{ github.event.repository.name }}
-
-      - name: Comment test results
-        uses: peter-evans/create-or-update-comment@v4
+      - name: Playwright report comment
+        uses: daun/playwright-report-summary@v3
+        if: always()
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body-path: pr-comment-body.md
-          edit-mode: replace
+          report-file: test-reports/results.json
+          test-command: "npm test --"
+          job-summary: true
