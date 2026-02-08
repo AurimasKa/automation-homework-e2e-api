@@ -78,9 +78,16 @@ jobs:
     if: always() && !cancelled() && needs.test.result != 'cancelled'
     needs: [test]
     permissions:
+      contents: read
       pages: write
       id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
       - name: Download playwright-report
         uses: actions/download-artifact@v4
         with:
@@ -92,6 +99,7 @@ jobs:
           path: test-reports
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
     continue-on-error: true
 
