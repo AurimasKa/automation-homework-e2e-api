@@ -133,22 +133,26 @@ jobs:
       - name: Upload screenshots for comment
         id: screenshots
         if: always()
+        env:
+          REPORT_URL: ${{ needs.deploy-report.outputs.report_url }}
         run: |
           echo "screenshots_md<<EOF" >> $GITHUB_OUTPUT
-          echo "### Failure screenshots" >> $GITHUB_OUTPUT
+          if [ -n "$REPORT_URL" ]; then
+            echo "### View report" >> $GITHUB_OUTPUT
+            echo "[**Open Playwright report**]($REPORT_URL) (HTML report in browser)" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+          fi
           count=0
           for f in $(find test-results -type f -name "*.png" 2>/dev/null | head -10); do
             name=$(basename "$f" .png)
             url=$(curl -sS --upload-file "$f" "https://transfer.sh/${name}.png" 2>/dev/null) || true
             if [ -n "$url" ]; then
+              if [ $count -eq 0 ]; then echo "### Failure screenshots" >> $GITHUB_OUTPUT; fi
               echo "**$name**" >> $GITHUB_OUTPUT
               echo "![screenshot]($url)" >> $GITHUB_OUTPUT
               count=$((count + 1))
             fi
           done
-          if [ $count -eq 0 ]; then
-            echo "_No failure screenshots (or none uploaded)._" >> $GITHUB_OUTPUT
-          fi
           echo "" >> $GITHUB_OUTPUT
           echo "**Videos & full report:** Download the **playwright-report** artifact, extract it, then run \`npx playwright show-report test-reports\` to view videos and the full report." >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
