@@ -69,11 +69,36 @@ jobs:
           path: report-bundle/
           retention-days: 30
 
+  # Deploys the Playwright HTML report so the PR comment link opens in the browser.
+  # Enable in repo: Settings → Pages → Source: GitHub Actions.
+  deploy-report:
+    name: Deploy report to GitHub Pages
+    runs-on: ubuntu-latest
+    if: always() && !cancelled() && needs.test.result != 'cancelled'
+    needs: [test]
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Download playwright-report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: test-reports
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+    continue-on-error: true
+
   pr-comment:
     name: Comment on PR
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'pull_request'
-    needs: [test]
+    if: always() && github.event_name == 'pull_request' && !cancelled()
+    needs: [test, deploy-report]
     permissions:
       contents: read
       pull-requests: write

@@ -37,6 +37,10 @@ function collectFailedTests(suites) {
 }
 
 const workflowUrl = 'https://github.com/' + repo + '/actions/runs/' + runId;
+const reportUrl =
+  repo && repo.includes('/')
+    ? 'https://' + repo.split('/')[0] + '.github.io/' + repo.split('/')[1] + '/'
+    : '';
 
 let body;
 try {
@@ -69,6 +73,10 @@ try {
     lines.push('');
   }
   lines.push('**Summary:** See the **Playwright Tests** check above or the [workflow run](' + workflowUrl + ') for details.');
+  if (reportUrl) {
+    lines.push('');
+    lines.push('**Report:** [View Playwright report](' + reportUrl + ')');
+  }
   body = lines.join('\n');
 } catch (_err) {
   const status = testResult === 'success' ? '✅ **All tests passed**' : '❌ **Tests failed**';
@@ -78,6 +86,7 @@ try {
     status,
     '',
     '**Summary:** See the [workflow run](' + workflowUrl + ') for details.',
+    ...(reportUrl ? ['', '**Report:** [View Playwright report](' + reportUrl + ')'] : []),
   ].join('\n');
 }
 
