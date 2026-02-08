@@ -13,6 +13,12 @@ export class PaymentMethodPage extends PageObject {
       .filter({ hasText: /credit\/debit card/i });
   }
 
+  get creditDebitCardTile(): Locator {
+    return this.page
+      .locator('.s-selection-tile-container, .offer-tile')
+      .filter({ hasText: /credit\/debit card/i });
+  }
+
   get euroBankTransferTile(): Locator {
     return this.page
       .locator('.s-selection-tile-container, .offer-tile')

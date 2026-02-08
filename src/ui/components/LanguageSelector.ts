@@ -16,18 +16,30 @@ export class LanguageSelector {
       .first();
   }
 
+  get languageOptions(): Locator {
+    return this.page.locator('a.s-link');
+  }
+
+  @TestStep
+  async clickLanguageOption(): Promise<void> {
+    await this.languageOptions.click();
+  } 
+
   @TestStep
   async openMenu(): Promise<void> {
     await this.menuButton.click();
   }
 
+  getLanguageOptionLocator(language: string | RegExp): Locator {
+    const pattern = typeof language === 'string' ? new RegExp(language, 'i') : language;
+    return this.page
+      .locator('a.s-link')
+      .filter({ has: this.page.locator('.label', { hasText: pattern }) })
+      .first();
+  }
+
   @TestStep
-  async selectLanguage(language: string): Promise<void> {
-    await this.openMenu();
-    await this.page
-      .locator('li.s-menu-item')
-      .filter({ hasText: new RegExp(language, 'i') })
-      .first()
-      .click();
+  async clickOnLanguageOption(language: string | RegExp): Promise<void> {
+    await this.getLanguageOptionLocator(language).click();
   }
 }

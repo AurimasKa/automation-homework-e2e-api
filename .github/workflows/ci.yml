@@ -1,12 +1,16 @@
-# Reproducible CI: Node from .nvmrc, dependencies from package-lock.json (npm ci),
-# Playwright from lockfile. Pin actions to full tags for reproducibility.
 name: CI
 
+# Run on any PR (no branch filter) so tests run when default branch isn't main/master
 on:
   push:
     branches: [main, master]
   pull_request:
-    branches: [main, master]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
   test:
@@ -21,8 +25,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
+          node-version-file: ".nvmrc"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -36,40 +40,92 @@ jobs:
         env:
           CI: true
 
-      - name: Test result summary
+      - name: Publish test report
+        if: always() && !cancelled()
+        uses: dorny/test-reporter@v2
+        with:
+          name: Playwright Tests
+          path: test-reports/junit.xml
+          reporter: java-junit
+          list-suites: all
+          list-tests: failed
+          fail-on-error: false
+          fail-on-empty: false
+          report-title: Playwright test results
+          use-actions-summary: true
+
+      - name: Prepare report bundle (HTML report + traces, screenshots, videos)
         if: always()
         run: |
-          echo "## ${{ steps.tests.outcome == 'success' && '✅ All tests passed' || '❌ Tests failed' }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.tests.outcome }}" != "success" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Download the **playwright-html-report** and **playwright-test-results** artifacts for:" >> $GITHUB_STEP_SUMMARY
-            echo "- HTML report (open \`index.html\` in browser)" >> $GITHUB_STEP_SUMMARY
-            echo "- Screenshots, videos, traces, JUnit/JSON results" >> $GITHUB_STEP_SUMMARY
+          mkdir -p report-bundle
+          cp -r test-reports report-bundle/ 2>/dev/null || true
+          cp -r test-results report-bundle/ 2>/dev/null || true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: report-bundle/
+          retention-days: 30
+
+  deploy-report:
+    name: Publish report to GitHub Pages
+    runs-on: ubuntu-latest
+    if: always() && !cancelled()
+    needs: [test]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or update gh-pages
+        run: |
+          git fetch origin gh-pages 2>/dev/null || true
+          if git show-ref --verify refs/remotes/origin/gh-pages 2>/dev/null; then
+            git checkout gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf . 2>/dev/null || true
+            echo "# Reports" > README.md
+            git add README.md
+            git commit -m "Init gh-pages"
+            git push -u origin gh-pages
           fi
 
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Download report artifact
+        uses: actions/download-artifact@v4
         with:
-          name: playwright-html-report
-          path: playwright-report/
-          retention-days: 14
+          name: playwright-report
 
-      - name: Upload test results (screenshots, videos, traces)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-test-results
-          path: test-results/
-          retention-days: 14
+      - name: Publish report for this run
+        run: |
+          RUN_DIR="report/run-${{ github.run_id }}"
+          mkdir -p "$RUN_DIR"
+          cp -r test-reports "$RUN_DIR/" 2>/dev/null || true
+          cp -r test-results "$RUN_DIR/" 2>/dev/null || true
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add report/
+          git diff --staged --quiet || git commit -m "Report: run ${{ github.run_id }}"
+          git push
 
   pr-comment:
-    name: Comment test result on PR
+    name: Comment on PR
     runs-on: ubuntu-latest
     if: always() && github.event_name == 'pull_request'
-    needs: [test]
+    needs: [test, deploy-report]
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-      - name: Create or update PR comment
+      - name: Comment test results
         uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +134,7 @@ jobs:
             ## Playwright test results
             ${{ needs.test.result == 'success' && '✅ **All tests passed**' || '❌ **Tests failed**' }}
 
-            **[Open workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})** → download **playwright-html-report** at the bottom → unzip → open `index.html` in a browser to view the full report.
-          comment-tag: playwright-ci
+            **Summary:** See the **Playwright Tests** check above (or the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id })) for the test result table and failed-test details.
+
+            **Full report (traces, screenshots, videos):** [Open HTML report →](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/report/run-${{ github.run_id }}/test-reports/index.html) · or download the **playwright-report** artifact and run `npx playwright show-report test-reports` locally.
           edit-mode: replace
