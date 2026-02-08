@@ -55,6 +55,7 @@ jobs:
           report-title: Playwright test results
           use-actions-summary: true
 
+      # Built-in Playwright reports saved as artifacts.
       - name: Prepare report bundle (HTML report + traces, screenshots, videos)
         if: always()
         run: |
@@ -70,30 +71,24 @@ jobs:
           path: report-bundle/
           retention-days: 30
 
-  # Project site: publishes at https://<owner>.github.io/<repo>/ (not root).
-  # Pages needs index.html at the published root; we copy the report so index.html is at report-root/.
+  # Deploy report to Netlify so "View report" in the PR comment opens in the browser.
+  # Add repo secrets: NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID (create a site at netlify.com first).
   deploy-report:
-    name: Deploy report to GitHub Pages
+    name: Deploy report to Netlify
     runs-on: ubuntu-latest
     if: always() && !cancelled() && needs.test.result != 'cancelled' && (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'pull_request')
     needs: [test]
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      report_url: ${{ steps.deploy.outputs.NETLIFY_LIVE_URL }}
     steps:
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v4
-
       - name: Download playwright-report
         uses: actions/download-artifact@v4
         with:
           name: playwright-report
 
-      - name: Prepare report for Pages
+      - name: Prepare report for deploy
         run: |
           mkdir -p report-root
           if [ -f test-reports/index.html ]; then
@@ -101,26 +96,21 @@ jobs:
           elif [ -f playwright-report/test-reports/index.html ]; then
             cp -r playwright-report/test-reports/. report-root/
           else
-            echo "index.html not found. Search:"
             find . -name index.html
             exit 1
           fi
-          if [ ! -f report-root/index.html ]; then
-            echo "report-root must contain index.html at root for Pages. Contents:"
-            ls -la report-root
-            exit 1
-          fi
-          echo "report-root ready (index.html at root):"
-          ls report-root
+          test -f report-root/index.html || (ls -la report-root && exit 1)
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to Netlify
+        id: deploy
+        uses: jsmrcaga/action-netlify-deploy@v2.0.0
         with:
-          path: report-root
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_DEPLOY_TO_PROD: true
+          build_directory: report-root
+          install_command: "echo Skipping install"
+          build_command: "echo Skipping build"
     continue-on-error: true
 
   pr-comment:
@@ -140,6 +130,29 @@ jobs:
         with:
           name: playwright-report
 
+      - name: Upload screenshots for comment
+        id: screenshots
+        if: always()
+        run: |
+          echo "screenshots_md<<EOF" >> $GITHUB_OUTPUT
+          echo "### Failure screenshots" >> $GITHUB_OUTPUT
+          count=0
+          for f in $(find test-results -type f -name "*.png" 2>/dev/null | head -10); do
+            name=$(basename "$f" .png)
+            url=$(curl -sS --upload-file "$f" "https://transfer.sh/${name}.png" 2>/dev/null) || true
+            if [ -n "$url" ]; then
+              echo "**$name**" >> $GITHUB_OUTPUT
+              echo "![screenshot]($url)" >> $GITHUB_OUTPUT
+              count=$((count + 1))
+            fi
+          done
+          if [ $count -eq 0 ]; then
+            echo "_No failure screenshots (or none uploaded)._" >> $GITHUB_OUTPUT
+          fi
+          echo "" >> $GITHUB_OUTPUT
+          echo "**Videos & full report:** Download the **playwright-report** artifact, extract it, then run \`npx playwright show-report test-reports\` to view videos and the full report." >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Playwright report comment
         uses: daun/playwright-report-summary@v3
         if: always()
@@ -147,4 +160,5 @@ jobs:
           report-file: test-reports/results.json
           test-command: "npm test --"
           job-summary: true
-          report-url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          report-url: ${{ needs.deploy-report.outputs.report_url }}
+          footer: ${{ steps.screenshots.outputs.screenshots_md }}
