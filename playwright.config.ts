@@ -12,9 +12,9 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   reporter: process.env.CI 
     ? [
-        ['html', { outputFolder: 'playwright-report' }],
-        ['json', { outputFile: 'test-results/results.json' }],
-        ['junit', { outputFile: 'test-results/junit.xml' }],
+        ['html', { outputFolder: 'test-reports' }],
+        ['json', { outputFile: 'test-reports/results.json' }],
+        ['junit', { outputFile: 'test-reports/junit.xml' }],
         ['list']
       ]
     : [
@@ -22,7 +22,7 @@ export default defineConfig({
         ['list']
       ],
   use: {
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36',
     headless: process.env.CI ? true : false,
     screenshot: 'only-on-failure',
