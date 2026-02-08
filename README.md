@@ -51,3 +51,7 @@ BASE_URL=https://simplex.com npm test
 ```bash
 npm run report
 ```
+
+## CI
+
+Tests run on GitHub Actions on push and pull requests to `main` or `master` (see [.github/workflows/ci.yml](.github/workflows/ci.yml)).
