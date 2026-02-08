@@ -10,12 +10,13 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   timeout: process.env.CI ? 60_000 : 40_000,
   expect: { timeout: 15_000 },
-  reporter: process.env.CI 
+  reporter: process.env.CI
     ? [
+        ['github'],
         ['html', { outputFolder: 'test-reports' }],
         ['json', { outputFile: 'test-reports/results.json' }],
         ['junit', { outputFile: 'test-reports/junit.xml' }],
-        ['list']
+        ['line']
       ]
     : [
         ['html', { outputFolder: 'playwright-report', open: 'on-failure' }],

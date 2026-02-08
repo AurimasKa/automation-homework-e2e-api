@@ -2,6 +2,7 @@ node_modules/
 playwright-report/
 test-reports/
 test-results/
+pr-comment-body.md
 .env
 .env.local
 *.log
