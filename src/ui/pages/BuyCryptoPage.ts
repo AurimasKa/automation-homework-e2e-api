@@ -1,7 +1,8 @@
 import { Page, Locator } from '@playwright/test';
 import { PageObject } from '../PageObject';
 import { TestStep } from '../utils/test-step';
-import { selectors } from '../selectors';
+
+const formIframe = 'iframe[src*="simplex-affiliates.com/form"]';
 
 export class BuyCryptoPage extends PageObject {
   constructor(page: Page) {
@@ -9,7 +10,7 @@ export class BuyCryptoPage extends PageObject {
   }
 
   private get formFrame() {
-    return this.page.frameLocator(selectors.formIframe);
+    return this.page.frameLocator(formIframe);
   }
 
   get fiatAmountInput(): Locator {
@@ -46,7 +47,7 @@ export class BuyCryptoPage extends PageObject {
 
   @TestStep
   async enterFiatAmount(amount: string): Promise<void> {
-    await this.fiatAmountInput.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.fiatAmountInput.waitFor({ state: 'visible' });
     await this.fiatAmountInput.fill(amount);
   }
 
@@ -85,7 +86,7 @@ export class BuyCryptoPage extends PageObject {
     const option = this.formFrame.locator(
       `li.autocomplete-result[data-currency="${currency.toUpperCase()}"]`,
     ).first();
-    await option.waitFor({ state: 'visible', timeout: 5_000 });
-    await option.click();
+    await option.waitFor({ state: 'visible' });
+    await option.click(); 
   }
 }
