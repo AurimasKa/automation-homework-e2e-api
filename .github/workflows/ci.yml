@@ -76,7 +76,7 @@ jobs:
   deploy-report:
     name: Deploy report to GitHub Pages
     runs-on: ubuntu-latest
-    if: always() && !cancelled() && needs.test.result != 'cancelled' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: always() && !cancelled() && needs.test.result != 'cancelled' && github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     needs: [test]
     permissions:
       contents: read
@@ -94,10 +94,25 @@ jobs:
         with:
           name: playwright-report
 
+      # Artifact may extract as workspace root (test-reports/) or under artifact name (playwright-report/test-reports/).
+      # Ensure index.html is at the root of the Pages site.
+      - name: Prepare report for Pages
+        run: |
+          mkdir -p report-root
+          if [ -f test-reports/index.html ]; then
+            cp -r test-reports/. report-root/
+          elif [ -f playwright-report/test-reports/index.html ]; then
+            cp -r playwright-report/test-reports/. report-root/
+          else
+            echo "index.html not found. Contents:"
+            find . -name index.html
+            exit 1
+          fi
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: test-reports
+          path: report-root
 
       - name: Deploy to GitHub Pages
         id: deployment
